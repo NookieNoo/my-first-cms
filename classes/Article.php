@@ -181,7 +181,7 @@ class Article
             $list[] = $article;
         }
         
-        var_dump($list);
+        //var_dump($list);
 
         // Получаем общее количество статей, которые соответствуют критерию
         $sql = "SELECT FOUND_ROWS() AS totalRows";
