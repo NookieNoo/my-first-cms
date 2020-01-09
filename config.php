@@ -1,4 +1,5 @@
 <?php
+//test
 try {
     // Включаем полное отображение ошибок
     ini_set("display_errors", true);
