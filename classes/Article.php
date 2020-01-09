@@ -36,6 +36,12 @@ class Article
     * @var string HTML содержание статьи
     */
     public $content = null;
+    
+    /**
+    * @var string Описание статьи (50 символов + ...)
+    */
+    public $newSummary = null;
+    
     /**
     * Устанавливаем свойства с помощью значений в заданном массиве
     *
@@ -123,7 +129,7 @@ class Article
         $st = $conn->prepare($sql);
         $st->bindValue(":id", $id, PDO::PARAM_INT);
         $st->execute();
-
+        
         $row = $st->fetch();
         $conn = null;
         
@@ -150,7 +156,7 @@ class Article
                 AS publicationDate
                 FROM articles $categoryClause
                 ORDER BY  $order  LIMIT :numRows";
-        
+       
         $st = $conn->prepare($sql);
 //                        echo "<pre>";
 //                        print_r($st);
@@ -167,11 +173,15 @@ class Article
 //                        echo "</pre>";
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $list = array();
-
+        
         while ($row = $st->fetch()) {
             $article = new Article($row);
+            // Вырезаем 50 символов и добавляем ...
+            $article->newSummary = mb_substr($article->summary, 0, 50)."...";
             $list[] = $article;
         }
+        
+        var_dump($list);
 
         // Получаем общее количество статей, которые соответствуют критерию
         $sql = "SELECT FOUND_ROWS() AS totalRows";

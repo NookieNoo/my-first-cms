@@ -8,7 +8,7 @@ try {
     
     // Настройки БД и остальных параметров будем хранить в массиве
     $CmsConfiguration = array(); 
-    $CmsConfiguration["DB_DSN"] = "mysql:host=localhost;dbname=cms;charset=utf8;" ;
+    $CmsConfiguration["DB_DSN"] = "mysql:host=localhost;dbname=cms_biv;charset=utf8;" ;
     $CmsConfiguration["DB_USERNAME"] = "root";
     $CmsConfiguration["DB_PASSWORD"] = "qwe123";
     
@@ -17,7 +17,7 @@ try {
     $CmsConfiguration["TEMPLATE_PATH"] = "templates";
     $CmsConfiguration["HOMEPAGE_NUM_ARTICLES"] = 5;
     $CmsConfiguration["ADMIN_USERNAME"] = "admin";
-    $CmsConfiguration["ADMIN_PASSWORD"] = "mypass";
+    $CmsConfiguration["ADMIN_PASSWORD"] = "mypass"; //
     
     
     include 'config-local.php'; /* подключаем локальный конфигурационный файл
