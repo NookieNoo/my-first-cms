@@ -95,6 +95,11 @@ function newArticle() {
 //            print_r($_POST);
 //            echo "<pre>";
 //            В $_POST данные о статье сохраняются корректно
+        //конвертируем значение чекбокса on в число
+        if ($_POST['active'] == "on") {
+            $_POST['active'] = 1;
+        }
+        else $_POST['active'] = 0;
         // Пользователь получает форму редактирования статьи: сохраняем новую статью
         $article = new Article();
         $article->storeFormValues( $_POST );
@@ -138,7 +143,13 @@ function editArticle() {
             header( "Location: admin.php?error=articleNotFound" );
             return;
         }
-
+        
+        //конвертируем значение чекбокса on в число
+        if ($_POST['active'] == "on") {
+            $_POST['active'] = 1;
+        }
+        else $_POST['active'] = 0;
+        
         $article->storeFormValues( $_POST );
         $article->update();
         header( "Location: admin.php?status=changesSaved" );

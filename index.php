@@ -86,7 +86,8 @@ function viewArticle()
 function homepage() 
 {
     $results = array();
-    $data = Article::getList(HOMEPAGE_NUM_ARTICLES);
+    $data = Article::getList(HOMEPAGE_NUM_ARTICLES, null, "publicationDate DESC"
+            , "WHERE active=1");
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     
@@ -97,7 +98,7 @@ function homepage()
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";
-    
+
 //    echo "<pre>";
 //    print_r($data);
 //    echo "</pre>";
