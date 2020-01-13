@@ -17,7 +17,9 @@
               <th>Publication Date</th>
               <th>Article</th>
               <th>Category</th>
+              <?php if(isset($_SESSION['adminStatus'])) echo"
               <th>Status</th>
+              ";?>
             </tr>
 
 <!--<?php echo "<pre>"; print_r ($results['articles'][2]->publicationDate); echo "</pre>"; ?> Обращаемся к дате массива $results. Дата = 0 -->
@@ -43,9 +45,12 @@
                 echo "Без категории";
                 }?>
               </td>
+              <?php if(isset($_SESSION['adminStatus'])) echo"
               <td>
-                  <input type='checkbox' name="active" disabled <?php if ($article->active === 1) echo 'checked'?>>
+                  <input type='checkbox' name='active' disabled
+                       ";if ($article->active === 1) echo "checked>
               </td>
+              ";?>
             </tr>
 
     <?php } ?>
