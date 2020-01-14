@@ -1,10 +1,9 @@
 <?php include "templates/include/header.php" ?>
 <?php include "templates/admin/include/header.php" ?>
-<!--        <?php echo "<pre>";
-            print_r($results);
-            print_r($data);
-        echo "<pre>"; ?> Данные о массиве $results и типе формы передаются корректно-->
-
+        <?php 
+            //var_dump($results);
+            //var_dump($data);
+        ?>
         <h1><?php echo $results['pageTitle']?></h1>
 
         <form action="admin.php?action=<?php echo $results['formAction']?>" method="post">
@@ -33,14 +32,26 @@
 
               <li>
                 <label for="categoryId">Article Category</label>
-                <select name="categoryId">
-                  <option value="0"<?php echo !$results['article']->categoryId ? " selected" : ""?>>(none)</option>
-                <?php foreach ( $results['categories'] as $category ) { ?>
-                  <option value="<?php echo $category->id?>"<?php echo ( $category->id == $results['article']->categoryId ) ? " selected" : ""?>><?php echo htmlspecialchars( $category->name )?></option>
-                <?php } ?>
+                <select name="categoryId" style="height: 2em;">
+                  <option value="0"<?php echo !$results['article']->categoryId ? " selected" : ""?>>(none)
+                  </option>
+                    <?php foreach ( $results['categories'] as $category ) { ?>
+                      <option value="<?php echo $category->id?>"<?php echo ( $category->id == $results['article']->categoryId ) ? " selected" : ""?>><?php echo htmlspecialchars( $category->name )?>
+                      </option>
+                    <?php } ?>
                 </select>
               </li>
 
+              <li>
+                <label for="subСategory_id">Subcategory name</label>
+                <select name="subСategory_id">
+                  <?php foreach ($results['subCategories'] as $subCategory )
+                        { ?>
+                  <option value="<?php echo $subCategory->id?>"<?php echo ($subCategory->id == $results['article']->subCategory_id) ? " selected" : ""?>><?php echo $subCategory->name?></option>
+                  <?php } ?>
+                </select>
+              </li>
+              
               <li>
                 <label for="publicationDate">Publication Date</label>
                 <input type="date" name="publicationDate" id="publicationDate" placeholder="YYYY-MM-DD" required maxlength="10" value="<?php echo $results['article']->publicationDate ? date( "Y-m-d", $results['article']->publicationDate ) : "" ?>" />
@@ -50,7 +61,6 @@
                 <label for="active">Status</label>
                 <input type="checkbox" name="active" <?php if ($results['article']->active === 1) echo 'checked'?>>
               </li>
-
             </ul>
 
             <div class="buttons">
@@ -67,6 +77,4 @@
           </p>
     <?php } ?>
 	  
-<?php include "templates/include/footer.php" ?>
-
-              
+<?php include "templates/include/footer.php"?>

@@ -50,6 +50,18 @@ switch ($action) {
     case 'deleteUser':
         deleteUser();
         break;
+    case 'newSubCategory':
+        newSubCategory();
+        break;
+    case 'deleteSubCategory':
+        deleteSubCategory();
+        break;
+    case 'listSubCategories':
+        listSubCategories();
+        break;
+    case 'editSubCategory':
+        editSubCategory();
+        break;
     default:
         listArticles();
 }
@@ -137,11 +149,7 @@ function newArticle() {
     $results['formAction'] = "newArticle";
 
     if ( isset( $_POST['saveChanges'] ) ) {
-//            echo "<pre>";
-//            print_r($results);
-//            print_r($_POST);
-//            echo "<pre>";
-//            В $_POST данные о статье сохраняются корректно
+        
         //конвертируем значение чекбокса on в число
         if ($_POST['active'] == "on") {
             $_POST['active'] = 1;
@@ -149,11 +157,13 @@ function newArticle() {
         else $_POST['active'] = 0;
         // Пользователь получает форму редактирования статьи: сохраняем новую статью
         $article = new Article();
-        $article->storeFormValues( $_POST );
-//            echo "<pre>";
-//            print_r($article);
-//            echo "<pre>";
-//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
+        $article->storeFormValues($_POST);      
+        
+        echo 'POST';
+        var_dump($_POST);
+        echo 'Article-Object';
+        var_dump($article);
+        
         $article->insert();
         header( "Location: admin.php?status=changesSaved" );
 
@@ -162,12 +172,14 @@ function newArticle() {
         // Пользователь сбросил результаты редактирования: возвращаемся к списку статей
         header( "Location: admin.php" );
     } else {
-
+        
         // Пользователь еще не получил форму редактирования: выводим форму
         $results['article'] = new Article;
         $data = Category::getList();
+        $subCategoryData = SubCategory::getList();
         $results['categories'] = $data['results'];
-        require( TEMPLATE_PATH . "/admin/edit" );
+        $results['subCategories'] = $subCategoryData['results'];
+        require( TEMPLATE_PATH . "/admin/editArticle.php" );
     }
 }
 
@@ -197,7 +209,7 @@ function editArticle() {
         }
         else $_POST['active'] = 0;
         
-        $article->storeFormValues( $_POST );
+        $article->storeFormValues($_POST);
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
 
@@ -207,10 +219,12 @@ function editArticle() {
         header( "Location: admin.php" );
     } else {
 
-        // Пользвоатель еще не получил форму редактирования: выводим форму
+        // Пользователь еще не получил форму редактирования: выводим форму
         $results['article'] = Article::getById((int)$_GET['articleId']);
         $data = Category::getList();
+        $subCategoryData = SubCategory::getList();
         $results['categories'] = $data['results'];
+        $results['subCategories'] = $subCategoryData['results'];
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
 
@@ -476,4 +490,112 @@ function deleteUser() {
 
     $user->delete();
     header( "Location: admin.php?status=userDeleted" );
+}
+
+function listSubCategories() {
+    $results = array();
+    
+    $data = SubCategory::getList();
+    $results['subCategories'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+
+    $results['pageTitle'] = "Все подкатегории";
+
+    if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
+        if ($_GET['error'] == "subCategoryNotFound") 
+            $results['errorMessage'] = "Error: subCategory not found.";
+    }
+
+    if (isset($_GET['status'])) { // вывод сообщения (если есть)
+        if ($_GET['status'] == "changesSaved") {
+            $results['statusMessage'] = "Your changes have been saved.";
+        }
+        if ($_GET['status'] == "subCategoryDeleted")  {
+            $results['statusMessage'] = "subCategory deleted.";
+        }
+    }
+
+    require(TEMPLATE_PATH . "/admin/subCategories/listSubCategories.php" );
+}
+
+function newSubCategory() {
+    $results = array();
+    $results['pageTitle'] = "New SubCategory";
+    $results['formAction'] = "newSubCategory";
+
+    if ( isset( $_POST['saveChanges'] ) ) {
+//            echo "<pre>";
+//            print_r($results);
+//            print_r($_POST);
+//            echo "<pre>";
+//            В $_POST данные о статье сохраняются корректно
+        //конвертируем значение чекбокса on в число
+        if ($_POST['activityStatus'] == "on") {
+            $_POST['activityStatus'] = 1;
+        }
+        else $_POST['activityStatus'] = 0;
+        // Пользователь получает форму редактирования статьи: сохраняем новую статью
+        $subCategory = new SubCategory();
+        $subCategory->storeFormValues( $_POST );
+
+        
+        $subCategory->insert();
+        header( "Location: admin.php?status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // Пользователь сбросил результаты редактирования: возвращаемся к списку статей
+        header( "Location: admin.php" );
+    } else {
+
+        // Пользователь еще не получил форму редактирования: выводим форму
+        $results['subCategory'] = new SubCategory();
+        $data = SubCategory::getList();
+        $results['subCategories'] = $data['results'];
+        require(TEMPLATE_PATH . "/admin/subCategories/editSubCategory.php");
+    }
+}
+
+function editSubCategory() {
+    $results = array();
+    $results['pageTitle'] = "Edit SubCategory";
+    $results['formAction'] = "editSubCategory";
+
+    if (isset($_POST['saveChanges'])) {
+
+        // Пользователь получил форму редактирования статьи: сохраняем изменения
+        if ( !$subCategory = SubCategory::getById( (int)$_POST['id'] ) ) {
+            header( "Location: admin.php?error=subCategoryNotFound" );
+            return;
+        }
+
+        $subCategory->storeFormValues($_POST);
+        $subCategory->update();
+        header( "Location: admin.php?status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // Пользователь отказался от результатов редактирования: возвращаемся к списку статей
+        header( "Location: admin.php" );
+    } else {
+
+        // Пользователь еще не получил форму редактирования: выводим форму
+        $results['subCategory'] = SubCategory::getById((int)$_GET['id']);
+        $data = SubCategory::getList();
+        $categoryData = Category::getList();
+        $results['subCategories'] = $data['results'];
+        $results['categories'] = $categoryData['results'];
+        require(TEMPLATE_PATH . "/admin/subCategories/editSubCategory.php");
+    }
+}
+
+function deleteSubCategory() {
+
+    if ( !$subCategory = SubCategory::getById( (int)$_GET['id'] ) ) {
+        header( "Location: admin.php?error=subCategoryNotFound" );
+        return;
+    }
+
+    $subCategory->delete();
+    header( "Location: admin.php?status=subCategoryDeleted" );
 }

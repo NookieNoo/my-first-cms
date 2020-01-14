@@ -49,21 +49,16 @@ class Article
     public $active = null;
     
     /**
+    * @var int Ссылка на подкатегорию (внешний ключ к subCategories).
+    */
+    public $subCategory_id = null;
+    
+    /**
     * Устанавливаем свойства с помощью значений в заданном массиве
     *
     * @param assoc Значения свойств
     */
 
-    /*
-    public function __construct( $data=array() ) {
-      if ( isset( $data['id'] ) ) {$this->id = (int) $data['id'];}
-      if ( isset( $data['publicationDate'] ) ) {$this->publicationDate = (int) $data['publicationDate'];}
-      if ( isset( $data['title'] ) ) {$this->title = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['title'] );}
-      if ( isset( $data['categoryId'] ) ) {$this->categoryId = (int) $data['categoryId'];}
-      if ( isset( $data['summary'] ) ) {$this->summary = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['summary'] );}
-      if ( isset( $data['content'] ) ) {$this->content = $data['content'];}
-    }*/
-    
     /**
      * Создаст объект статьи
      * 
@@ -80,8 +75,6 @@ class Article
           $this->publicationDate = (string) $data['publicationDate'];     
       }
 
-      //die(print_r($this->publicationDate));
-
       if (isset($data['title'])) {
           $this->title = $data['title'];        
       }
@@ -92,6 +85,10 @@ class Article
       
       if (isset($data['summary'])) {
           $this->summary = $data['summary'];         
+      }
+      
+      if (isset($data['subСategory_id'])) {
+          $this->subСategory_id = (int) $data['subСategory_id'];      
       }
       
       if (isset($data['content'])) {
@@ -109,10 +106,10 @@ class Article
     *
     * @param assoc Значения записи формы
     */
-    public function storeFormValues ( $params ) {
+    public function storeFormValues ($params) {
 
       // Сохраняем все параметры
-      $this->__construct( $params );
+      $this->__construct($params);
       
       // Разбираем и сохраняем дату публикации
       if ( isset($params['publicationDate']) ) {
@@ -217,19 +214,23 @@ class Article
     */
     public function insert() {
 
-        // Есть уже у объекта Article ID?
-        if ( !is_null( $this->id ) ) trigger_error ( "Article::insert(): Attempt to insert an Article object that already has its ID property set (to $this->id).", E_USER_ERROR );
-
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active )";
-        $st = $conn->prepare ( $sql );
+        $sql = "INSERT INTO articles (publicationDate, categoryId, title, summary,"
+                . " content, active, subCategory_id)"
+                . " VALUES (FROM_UNIXTIME(:publicationDate), :categoryId,"
+                . " :title, :summary, :content, :active, :subCategory_id)";
+
+        var_dump($sql);
+
+        $st = $conn->prepare ($sql);
         $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
         $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
         $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
         $st->bindValue( ":active", $this->active, PDO::PARAM_STR );
+        $st->bindValue( ":subCategory_id", $this->subCategory_id, PDO::PARAM_INT );
         $st->execute();
         $this->id = $conn->lastInsertId();
         $conn = null;
@@ -249,7 +250,8 @@ class Article
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
               . " categoryId=:categoryId, title=:title, summary=:summary,"
-              . " content=:content, active=:active WHERE id = :id";
+              . " content=:content, active=:active, subCategory_id=:subСategory_id"
+              . " WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
@@ -258,6 +260,7 @@ class Article
       $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
       $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
       $st->bindValue( ":active", $this->active, PDO::PARAM_STR );
+      $st->bindValue( ":subСategory_id", $this->subСategory_id, PDO::PARAM_INT);
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );   
       $st->execute();
       $conn = null;
@@ -280,4 +283,7 @@ class Article
       $conn = null;
     }
 
+    public function checkSubCategory() {
+        
+    }
 }
