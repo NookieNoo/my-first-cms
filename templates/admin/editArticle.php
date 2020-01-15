@@ -14,7 +14,7 @@
     <?php } ?>
 
             <ul>
-
+                   
               <li>
                 <label for="title">Article Title</label>
                 <input type="text" name="title" id="title" placeholder="Name of the article" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['article']->title )?>" />
@@ -43,8 +43,8 @@
               </li>
 
               <li>
-                <label for="subСategory_id">Subcategory name</label>
-                <select name="subСategory_id">
+                <label for="subCategory_id">Subcategory name</label>
+                <select name="subCategory_id">
                   <?php foreach ($results['subCategories'] as $subCategory )
                         { ?>
                   <option value="<?php echo $subCategory->id?>"<?php echo ($subCategory->id == $results['article']->subCategory_id) ? " selected" : ""?>><?php echo $subCategory->name?></option>

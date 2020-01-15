@@ -20,6 +20,9 @@ function initApplication()
         case 'archive':
           archive();
           break;
+        case 'archiveSubCategories':
+          archiveSubCategories();
+          break;
         case 'viewArticle':
           viewArticle();
           break;
@@ -27,6 +30,7 @@ function initApplication()
           homepage();
     }
 }
+
 
 function archive() 
 {
@@ -53,6 +57,37 @@ function archive()
     
     require( TEMPLATE_PATH . "/archive.php" );
 }
+
+
+
+function archiveSubCategories() 
+{
+    $results = [];
+    
+    $subCategory_id = ( isset( $_GET['subCategory_id'] ) && $_GET['subCategory_id'] ) ? (int)$_GET['subCategory_id'] : null;
+    
+    $results['subCategory_id'] = subCategory::getById($subCategory_id);
+    
+    //??
+    //$data = Article::getList( 100000, null, "publicationDate DESC", null, $results['subCategory'] ? $results['subCategory']->id : null );
+    $data = Article::getList(100000, null, "publicationDate DESC", null, 1);
+    
+    $results['articles'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+    
+    $data = SubCategory::getList();
+    $results['subCategories'] = array();
+    
+    foreach ( $data['results'] as $subCategory ) {
+        $results['subCategories'][$subCategory->id] = $subCategory;
+    }
+    
+    $results['pageHeading'] = $results['subCategory'] ?  $results['subCategory']->name : "Article Archive";
+    $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
+    
+    require( TEMPLATE_PATH . "/archiveSubCategories.php" );
+}
+
 
 /**
  * Загрузка страницы с конкретной статьёй
@@ -97,6 +132,12 @@ function homepage()
         $results['categories'][$category->id] = $category;
     } 
     
+    $data = SubCategory::getList();
+    $results['subCategories'] = array();
+    foreach ( $data['results'] as $subCategory ) { 
+        $results['subCategories'][$subCategory->id] = $subCategory;
+    }     
+    
     $results['pageTitle'] = "Простая CMS на PHP";
 
 //    echo "<pre>";
@@ -106,4 +147,4 @@ function homepage()
     
     require(TEMPLATE_PATH . "/homepage.php");
     
-}
+    }

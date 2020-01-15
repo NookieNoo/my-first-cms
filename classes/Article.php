@@ -87,8 +87,8 @@ class Article
           $this->summary = $data['summary'];         
       }
       
-      if (isset($data['subСategory_id'])) {
-          $this->subСategory_id = (int) $data['subСategory_id'];      
+      if (isset($data['subCategory_id'])) {
+          $this->subCategory_id = $data['subCategory_id'];      
       }
       
       if (isset($data['content'])) {
@@ -107,7 +107,6 @@ class Article
     * @param assoc Значения записи формы
     */
     public function storeFormValues ($params) {
-
       // Сохраняем все параметры
       $this->__construct($params);
       
@@ -155,25 +154,35 @@ class Article
     * @param string $activeFilter Столбец со статусом видимости статьи (по умолчанию = не используется)
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
-    public static function getList($numRows=1000000, 
-            $categoryId=null, $order="publicationDate DESC", $activeFilter = "") 
+    public static function getList($numRows=1000000, $categoryId=null,
+            $order="publicationDate DESC", $activeFilter = "",
+            $subCategory_id=null) 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
+        
+        if(isset($subCategory_id)) {
+            $categoryClause = "WHERE subCategory_id = :subCategory_id";
+        }
+        else {
+            $categoryClause = "";
+        }
+        
+        //$categoryClause = $subCategory_id ? "WHERE subCategory_id = :subCategory_id" : "";
         $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
                 FROM articles $categoryClause".$activeFilter."
                 ORDER BY  $order  LIMIT :numRows";
        
         $st = $conn->prepare($sql);
-//                        echo "<pre>";
-//                        print_r($st);
-//                      echo "</pre>";
-//                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
+        
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
         
         if ($categoryId) 
             $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
+        
+        if ($subCategory_id) 
+            $st->bindValue( ":subCategory_id", $subCategory_id, PDO::PARAM_STR);
         
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";
@@ -230,7 +239,7 @@ class Article
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
         $st->bindValue( ":active", $this->active, PDO::PARAM_STR );
-        $st->bindValue( ":subCategory_id", $this->subCategory_id, PDO::PARAM_INT );
+        $st->bindValue( ":subCategory_id", $this->subCategory_id, PDO::PARAM_STR );
         $st->execute();
         $this->id = $conn->lastInsertId();
         $conn = null;
@@ -281,9 +290,5 @@ class Article
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
       $st->execute();
       $conn = null;
-    }
-
-    public function checkSubCategory() {
-        
     }
 }

@@ -155,17 +155,21 @@ function newArticle() {
             $_POST['active'] = 1;
         }
         else $_POST['active'] = 0;
+        
         // Пользователь получает форму редактирования статьи: сохраняем новую статью
         $article = new Article();
-        $article->storeFormValues($_POST);      
+        $article->storeFormValues($_POST);  
         
-        echo 'POST';
-        var_dump($_POST);
-        echo 'Article-Object';
-        var_dump($article);
+        $category_id = SubCategory::getCategoryIDBySubCategoryId($article->subCategory_id);
         
-        $article->insert();
-        header( "Location: admin.php?status=changesSaved" );
+        if($category_id==$article->categoryId) {
+           $article->insert();
+           header("Location: admin.php?status=changesSaved"); 
+        } else {
+           $results['article'] = $article;
+           $results['errorMessage'] = "Ошибка: Выбранная категория не соответствует подкатегории!";
+           require( TEMPLATE_PATH . "/admin/editArticle.php" );
+        }
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
@@ -210,8 +214,17 @@ function editArticle() {
         else $_POST['active'] = 0;
         
         $article->storeFormValues($_POST);
-        $article->update();
-        header( "Location: admin.php?status=changesSaved" );
+        
+        $category_id = SubCategory::getCategoryIDBySubCategoryId($article->subCategory_id);
+        
+        if($category_id==$article->categoryId) {
+           $article->update();
+           header("Location: admin.php?status=changesSaved"); 
+        } else {
+           $results['article'] = $article;
+           $results['errorMessage'] = "Ошибка: Выбранная категория не соответствует подкатегории!";
+           require( TEMPLATE_PATH . "/admin/editArticle.php" );
+        }
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
@@ -259,8 +272,12 @@ function listArticles() {
     $results['pageTitle'] = "Все статьи";
 
     if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
-        if ($_GET['error'] == "articleNotFound") 
+        if ($_GET['error'] == "articleNotFound") {
             $results['errorMessage'] = "Error: Article not found.";
+        } else if ($_GET['error'] == "incorrectSubCategory") {
+            $results['errorMessage'] = "Ошибка: Выбранная категория не соответствует подкатегории!.";
+        }
+        
     }
 
     if (isset($_GET['status'])) { // вывод сообщения (если есть)
@@ -303,24 +320,19 @@ function newCategory() {
     $results['formAction'] = "newCategory";
 
     if ( isset( $_POST['saveChanges'] ) ) {
-
         // User has posted the category edit form: save the new category
         $category = new Category;
         $category->storeFormValues( $_POST );
         $category->insert();
         header( "Location: admin.php?action=listCategories&status=changesSaved" );
-
     } elseif ( isset( $_POST['cancel'] ) ) {
-
         // User has cancelled their edits: return to the category list
         header( "Location: admin.php?action=listCategories" );
     } else {
-
         // User has not posted the category edit form yet: display the form
         $results['category'] = new Category;
         require( TEMPLATE_PATH . "/admin/editCategory.php" );
     }
-
 }
 
 
@@ -331,18 +343,15 @@ function editCategory() {
     $results['formAction'] = "editCategory";
 
     if ( isset( $_POST['saveChanges'] ) ) {
-
         // User has posted the category edit form: save the category changes
-
         if ( !$category = Category::getById( (int)$_POST['categoryId'] ) ) {
           header( "Location: admin.php?action=listCategories&error=categoryNotFound" );
           return;
         }
 
-        $category->storeFormValues( $_POST );
+        $category->storeFormValues($_POST);
         $category->update();
         header( "Location: admin.php?action=listCategories&status=changesSaved" );
-
     } elseif ( isset( $_POST['cancel'] ) ) {
 
         // User has cancelled their edits: return to the category list

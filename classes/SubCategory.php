@@ -91,6 +91,22 @@ class SubCategory
             return $name;
         }
     }
+    
+    public static function getCategoryIDBySubCategoryId($id) {
+        $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
+        $sql = "SELECT category_id "
+                . "FROM subCategories " 
+                . "WHERE id = :id";
+        $st = $conn->prepare($sql);
+        $st->bindValue(":id", $id, PDO::PARAM_INT);
+        $st->execute();
+        $row = $st->fetch();
+        list($category_id) = $row;
+        $conn = null;
+        if ($category_id) {
+            return $category_id;
+        }
+    }
 
 
     /**
