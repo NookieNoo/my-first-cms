@@ -40,7 +40,7 @@ function archive()
     
     $results['category'] = Category::getById( $categoryId );
     
-    $data = Article::getList( 100000, $results['category'] ? $results['category']->id : null );
+    $data = Article::getList( 100000, $results['category'] ? $results['category']->id : null);
     
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
@@ -64,17 +64,18 @@ function archiveSubCategories()
 {
     $results = [];
     
-    $subCategory_id = ( isset( $_GET['subCategory_id'] ) && $_GET['subCategory_id'] ) ? (int)$_GET['subCategory_id'] : null;
+    $subCategory_id = ( isset( $_GET['subCategory_id'] ) ) ? (int)$_GET['subCategory_id'] : null;
     
-    $results['subCategory_id'] = subCategory::getById($subCategory_id);
+    $results['subCategory'] = subCategory::getById($subCategory_id);
     
     //??
     //$data = Article::getList( 100000, null, "publicationDate DESC", null, $results['subCategory'] ? $results['subCategory']->id : null );
-    $data = Article::getList(100000, null, "publicationDate DESC", null, 1);
+    //var_dump($results['subCategory']);
+    $data = Article::getList(100000, null, "publicationDate DESC", null, $results['subCategory']->id);
     
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    
+
     $data = SubCategory::getList();
     $results['subCategories'] = array();
     
@@ -84,7 +85,7 @@ function archiveSubCategories()
     
     $results['pageHeading'] = $results['subCategory'] ?  $results['subCategory']->name : "Article Archive";
     $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
-    
+    //var_dump($results);
     require( TEMPLATE_PATH . "/archiveSubCategories.php" );
 }
 

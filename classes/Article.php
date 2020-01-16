@@ -160,30 +160,28 @@ class Article
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
+        $subCategoryClause = $subCategory_id ? "WHERE subCategory_id = :subCategory_id" : "";
         
-        if(isset($subCategory_id)) {
-            $categoryClause = "WHERE subCategory_id = :subCategory_id";
-        }
-        else {
-            $categoryClause = "";
-        }
+
+        
         
         //$categoryClause = $subCategory_id ? "WHERE subCategory_id = :subCategory_id" : "";
         $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
-                FROM articles $categoryClause".$activeFilter."
+                FROM articles $categoryClause"."$subCategoryClause".$activeFilter."
                 ORDER BY  $order  LIMIT :numRows";
-       
+
         $st = $conn->prepare($sql);
         
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
         
-        if ($categoryId) 
+        if (isset($categoryId)) {
             $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
+        }
         
-        if ($subCategory_id) 
+        if (isset($subCategory_id)) {
             $st->bindValue( ":subCategory_id", $subCategory_id, PDO::PARAM_STR);
-        
+        }
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";
 //                        print_r($st);
