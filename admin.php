@@ -158,11 +158,12 @@ function newArticle() {
         
         // Пользователь получает форму редактирования статьи: сохраняем новую статью
         $article = new Article();
-        $article->storeFormValues($_POST);  
+        $article->storeFormValues($_POST);
         
         $category_id = SubCategory::getCategoryIDBySubCategoryId($article->subCategory_id);
         
         if($category_id==$article->categoryId) {
+           
            $article->insert();
            header("Location: admin.php?status=changesSaved"); 
         } else {
@@ -181,6 +182,9 @@ function newArticle() {
         $results['article'] = new Article;
         $data = Category::getList();
         $subCategoryData = SubCategory::getList();
+        $usernamesList = User::selectUsernamesAndId();
+        
+        $results['users'] = $usernamesList;
         $results['categories'] = $data['results'];
         $results['subCategories'] = $subCategoryData['results'];
         require( TEMPLATE_PATH . "/admin/editArticle.php" );
@@ -215,16 +219,29 @@ function editArticle() {
         
         $article->storeFormValues($_POST);
         
-        $category_id = SubCategory::getCategoryIDBySubCategoryId($article->subCategory_id);
         
-        if($category_id==$article->categoryId) {
-           $article->update();
-           header("Location: admin.php?status=changesSaved"); 
-        } else {
+        //проверка соответствия категории и подкатегории
+        $category_id = SubCategory::getCategoryIDBySubCategoryId($article->subCategory_id);
+        if($category_id!=$article->categoryId) {
            $results['article'] = $article;
            $results['errorMessage'] = "Ошибка: Выбранная категория не соответствует подкатегории!";
            require( TEMPLATE_PATH . "/admin/editArticle.php" );
         }
+        $article->update();
+        
+
+        //обработка старых связей с авторами
+        $article->deleteAuthors();
+        
+
+        //вставка новых связей с авторами
+        for($count=0; $count<count($_POST['authors']); $count++) {
+            $article->insertAuthor((int)$_POST['authors'][$count]);
+        }
+            
+        
+        header("Location: admin.php?status=changesSaved"); 
+        
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
@@ -238,6 +255,9 @@ function editArticle() {
         $subCategoryData = SubCategory::getList();
         $results['categories'] = $data['results'];
         $results['subCategories'] = $subCategoryData['results'];
+        $results['users'] = User::selectUsernamesAndId();
+        $results['authors'] = $results['article']->getAuthors();
+        
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
 
