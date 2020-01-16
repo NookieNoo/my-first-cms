@@ -52,6 +52,31 @@
                 </select>
               </li>
               
+              <?php if($_GET['action']=='editArticle'):?>
+              <li>
+                <label for="authors[]">Authors</label>
+                <select name="authors[]" multiple size="5">
+                  <?php foreach ( $results['users'] as $user ) { ?>
+                    <option value="<?php echo $user['id']?>" 
+                        <?php 
+                            if (isset($results['authors'])) {
+                                foreach ($results['authors'] as $author) {
+                                    if ($user['id']==$author['id']) {
+                                        echo 'selected';
+                                        break;
+                                    }
+                                }
+                            }
+                        ?>
+                         >
+                      <?php echo htmlspecialchars( $user['username'] )?>
+                    </option>
+                  <?php } ?>
+                 </select>
+              </li>
+              
+              <?php endif?>
+              
               <li>
                 <label for="publicationDate">Publication Date</label>
                 <input type="date" name="publicationDate" id="publicationDate" placeholder="YYYY-MM-DD" required maxlength="10" value="<?php echo $results['article']->publicationDate ? date( "Y-m-d", $results['article']->publicationDate ) : "" ?>" />

@@ -162,10 +162,6 @@ class Article
         $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
         $subCategoryClause = $subCategory_id ? "WHERE subCategory_id = :subCategory_id" : "";
         
-
-        
-        
-        //$categoryClause = $subCategory_id ? "WHERE subCategory_id = :subCategory_id" : "";
         $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
                 FROM articles $categoryClause"."$subCategoryClause".$activeFilter."
@@ -211,9 +207,29 @@ class Article
     }
 
 
-    /**
-    * Вставляем текущий объект статьи в базу данных, устанавливаем его свойства.
-    */
+    public function getAuthors() {
+        $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
+
+        $sql = "SELECT users.id, users.username 
+                FROM  article_users
+                LEFT JOIN users 
+                ON user_id = id 
+                WHERE article_users.article_id = :id";
+        
+        $st = $conn->prepare($sql);
+        $st->bindValue(":id", $this->id, PDO::PARAM_INT);
+        $st->execute();
+        
+        $list = array();
+        
+        while ($row = $st->fetch()) {
+            $list[] = $row;
+        }
+        
+        if ($list) { 
+            return $list;
+        }
+    }
 
 
     /**
@@ -243,6 +259,19 @@ class Article
         $conn = null;
     }
 
+    public function insertAuthor($user_id) {
+        
+        $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+        
+        $sql = "INSERT INTO `article_users` (`article_id`, `user_id`) VALUES (:article_id, :user_id)";
+        
+        $st = $conn->prepare($sql);
+        $st->bindValue( ":article_id", $this->id, PDO::PARAM_INT );
+        $st->bindValue( ":user_id", $user_id, PDO::PARAM_INT );
+        $st->execute();
+        $conn = null;
+    }
+    
     /**
     * Обновляем текущий объект статьи в базе данных
     */
@@ -285,6 +314,14 @@ class Article
       // Удаляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $st = $conn->prepare ( "DELETE FROM articles WHERE id = :id LIMIT 1" );
+      $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
+      $st->execute();
+      $conn = null;
+    }
+    
+    public function deleteAuthors() {
+      $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+      $st = $conn->prepare ( "DELETE FROM article_users WHERE article_id = :id" );
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
       $st->execute();
       $conn = null;

@@ -138,7 +138,8 @@ function homepage()
     foreach ( $data['results'] as $subCategory ) { 
         $results['subCategories'][$subCategory->id] = $subCategory;
     }     
-    
+      
+
     $results['pageTitle'] = "Простая CMS на PHP";
 
 //    echo "<pre>";

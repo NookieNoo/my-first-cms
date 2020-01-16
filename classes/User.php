@@ -94,26 +94,19 @@ class User
                 ORDER BY  $order  LIMIT :numRows";
        
         $st = $conn->prepare($sql);
-//                        echo "<pre>";
-//                        print_r($st);
-//                      echo "</pre>";
-//                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
+
+        
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
         
         
-        $st->execute(); // выполняем запрос к базе данных
-//                        echo "<pre>";
-//                        print_r($st);
-//                        echo "</pre>";
-//                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
+        $st->execute();
+        
         $list = array();
         
         while ($row = $st->fetch()) {
             $user = new User($row);
             $list[] = $user;
         }
-        
-        //var_dump($list);
 
         // Получаем общее количество пользователей, которые соответствуют критерию
         $sql = "SELECT FOUND_ROWS() AS totalRows";
@@ -125,6 +118,27 @@ class User
             "totalRows" => $totalRows[0]
             ) 
         );
+    }
+    
+    /**
+    * Выборка всех логинов и id
+    */
+    public static function selectUsernamesAndId () {
+        $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+        $sql = "SELECT username, id FROM users";
+        $st = $conn->prepare($sql);
+        $st->execute();
+
+        $list = array();
+        
+        while ($row = $st->fetch()) {
+            $list[] = $row;
+        }
+        
+        $conn = null;
+        if ($list) { 
+            return $list;
+        }
     }
     
     
@@ -198,22 +212,4 @@ class User
       // Сохраняем все параметры
       $this->__construct($params);
     }
-    
-    /**
-    * Выборка логина и пароля
-    */
-    public static function selectUsernameAndPassword () {
-        $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT username, password FROM users";
-        $st = $conn->prepare($sql);
-        $st->execute();
-        
-        $array = $st->fetch();
-        $conn = null;
-        
-        if ($array) { 
-            return $array;
-        }
-    }
-    
 }
