@@ -6,7 +6,6 @@ if (isset($_GET['articleId'])) {
     echo $article->content;
 }
 if (isset ($_POST['articleId'])) {
-    //die("Привет)");
     $article = Article::getById((int)$_POST['articleId']);
     echo json_encode($article);
 //        die("Привет)");
